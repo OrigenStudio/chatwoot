@@ -1,6 +1,7 @@
 <script setup>
 import { computed, useTemplateRef, ref, onMounted } from 'vue';
 import { Letter } from 'vue-letter';
+import { allowedCssProperties } from 'lettersanitizer';
 
 import Icon from 'next/icon/Icon.vue';
 import { EmailQuoteExtractor } from './removeReply.js';
@@ -92,14 +93,24 @@ const hasQuotedMessage = computed(() => {
         <template v-else>
           <Letter
             v-if="showQuotedMessage"
-            class-name="prose prose-bubble !max-w-none"
+            class-name="prose prose-bubble !max-w-none letter-render"
+            :allowed-css-properties="[
+              ...allowedCssProperties,
+              'transform',
+              'transform-origin',
+            ]"
             :html="fullHTML"
             :text="textToShow"
           />
           <Letter
             v-else
-            class-name="prose prose-bubble !max-w-none"
+            class-name="prose prose-bubble !max-w-none letter-render"
             :html="unquotedHTML"
+            :allowed-css-properties="[
+              ...allowedCssProperties,
+              'transform',
+              'transform-origin',
+            ]"
             :text="textToShow"
           />
         </template>
@@ -132,3 +143,21 @@ const hasQuotedMessage = computed(() => {
     </section>
   </BaseBubble>
 </template>
+
+<style lang="scss">
+// Tailwind resets break the rendering of google drive link in Gmail messages
+// This fixes it using https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors
+
+.letter-render [class*='gmail_drive_chip'] {
+  box-sizing: initial;
+  @apply bg-n-slate-4 border-n-slate-6 rounded-md !important;
+
+  a {
+    @apply text-n-slate-12 !important;
+
+    img {
+      display: inline-block;
+    }
+  }
+}
+</style>
